@@ -28,7 +28,7 @@ func (h *Handler) SearchAnime(c echo.Context) error {
 	log.Printf("Поиск аниме по запросу: %s", search)
 
 	// Получаем результаты поиска
-	animes, err := h.service.SearchAnime(c.Request().Context(), search, 1)
+	animes, err := h.service.SearchAnime(c.Request().Context(), search, 10)
 	if err != nil {
 		// Ошибка при получении данных
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
