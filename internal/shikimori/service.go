@@ -33,6 +33,11 @@ func (s *Service) SearchAnime(ctx context.Context, search string, limit int) ([]
 			rating
             score
             description
+			poster {
+                id
+                originalUrl
+                mainUrl
+            }
           }
         }
     `)
@@ -150,6 +155,11 @@ func (s *Service) GetAnimesByIDs(ctx context.Context, ids []string) ([]Anime, er
 				description
                 score
                 status
+				poster {
+                id
+                originalUrl
+                mainUrl
+            }
             }
         }
     `)
