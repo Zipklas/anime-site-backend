@@ -16,25 +16,21 @@ func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
 }
 
-// SearchAnime - обработчик для поиска аниме
 func (h *Handler) SearchAnime(c echo.Context) error {
-	// Извлекаем поисковый запрос из параметров URL
+
 	search := c.QueryParam("search")
 	if search == "" {
-		search = "bakemono" // Значение по умолчанию
+		search = "bakemono"
 	}
 
-	// Логируем запрос
 	log.Printf("Поиск аниме по запросу: %s", search)
 
-	// Получаем результаты поиска
 	animes, err := h.service.SearchAnime(c.Request().Context(), search, 10)
 	if err != nil {
-		// Ошибка при получении данных
+
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
-	// Если аниме не найдено, возвращаем соответствующее сообщение
 	if len(animes) == 0 {
 		log.Println("Не найдено аниме по запросу.")
 	}
@@ -45,7 +41,7 @@ func (h *Handler) SearchAnime(c echo.Context) error {
 
 // GetTopAnime - обработчик для получения топовых аниме по рейтингу
 func (h *Handler) GetTopAnime(c echo.Context) error {
-	// Извлекаем limit и page из query-параметров
+
 	limitStr := c.QueryParam("limit")
 	pageStr := c.QueryParam("page")
 
@@ -87,4 +83,24 @@ func (h *Handler) GetAnimeByID(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, anime)
+}
+func (h *Handler) GetNewReleases(c echo.Context) error {
+	limitStr := c.QueryParam("limit")
+	limit := 10 // значение по умолчанию
+
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	animes, err := h.service.GetNewReleases(c.Request().Context(), limit)
+	if err != nil {
+		log.Printf("Ошибка при получении новинок: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Не удалось получить список новинок",
+		})
+	}
+
+	return c.JSON(http.StatusOK, animes)
 }

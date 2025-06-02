@@ -2,8 +2,10 @@ package shikimori
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/machinebox/graphql"
 )
@@ -66,7 +68,6 @@ func (s *Service) SearchAnime(ctx context.Context, search string, limit int) ([]
 		return nil, err
 	}
 	log.Printf("Полученные данные: %+v", resp)
-	// Печатаем ответ для отладки
 	log.Printf("Полученные данные: %+v", resp.Animes)
 
 	// Возвращаем найденные аниме
@@ -173,6 +174,62 @@ func (s *Service) GetAnimesByIDs(ctx context.Context, ids []string) ([]Anime, er
 
 	var resp AnimeSearchResponseData
 
+	if err := s.graphqlClient.Run(ctx, req, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Animes, nil
+}
+func (s *Service) GetNewReleases(ctx context.Context, limit int) ([]Anime, error) {
+	req := graphql.NewRequest(`
+	query($limit: Int!, $season: SeasonString!, $status: AnimeStatusString!) {
+		animes(
+			limit: $limit,
+			order: popularity,
+			season: $season,
+			status: $status
+		) {
+			id
+			name
+			russian
+			score
+			poster {
+				originalUrl
+				mainUrl
+			}
+			airedOn {
+				year
+				month
+				day
+				date
+			}
+		}
+	}
+`)
+	season := ""
+	currentTime := time.Now()
+	month := int(currentTime.Month())
+	year := int(currentTime.Year())
+	var seasonPart string
+	switch {
+	case month >= 1 && month <= 3:
+		seasonPart = "winter"
+	case month >= 4 && month <= 6:
+		seasonPart = "spring"
+	case month >= 7 && month <= 9:
+		seasonPart = "summer"
+	case month >= 10 && month <= 12:
+		seasonPart = "fall"
+	}
+	season = fmt.Sprintf("%s_%d", seasonPart, year)
+	req.Var("limit", limit)
+	req.Var("season", season)
+	req.Var("status", "ongoing")
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("SHIKIMORI_TOKEN"))
+
+	var resp AnimeSearchResponseData
 	if err := s.graphqlClient.Run(ctx, req, &resp); err != nil {
 		return nil, err
 	}

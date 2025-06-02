@@ -18,7 +18,6 @@ type Comment struct {
 	IsApproved bool          `gorm:"default:true" json:"is_approved"`
 }
 
-// Добавляем новую модель для голосов
 type CommentVote struct {
 	UserID    uuid.UUID `gorm:"primaryKey;type:uuid" json:"-"`
 	CommentID uuid.UUID `gorm:"primaryKey;type:uuid" json:"comment_id"`
@@ -26,7 +25,6 @@ type CommentVote struct {
 	Comment   Comment   `gorm:"foreignKey:CommentID"`
 }
 
-// Добавляем поля в CommentWithUser
 type CommentWithUser struct {
 	Comment
 	UserEmail string `json:"user_email"`

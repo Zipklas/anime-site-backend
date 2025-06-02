@@ -99,7 +99,7 @@ func (s *Service) GetVideoByShikimoriID(
 	ctx context.Context,
 	baseParams url.Values,
 ) ([]Video, error) {
-	// Копируем параметры, чтобы не изменять оригинал
+
 	query := make(url.Values)
 	for k, v := range baseParams {
 		query[k] = v
@@ -141,7 +141,6 @@ func (s *Service) GetVideoByShikimoriID(
 			Duration:    result.Duration,
 		}
 
-		// Парсим сезоны и эпизоды
 		if result.Seasons != nil {
 			for seasonNum, seasonData := range result.Seasons {
 				seasonNumber, _ := strconv.Atoi(seasonNum)
@@ -150,7 +149,6 @@ func (s *Service) GetVideoByShikimoriID(
 					Link:   seasonData.Link,
 				}
 
-				// Парсим эпизоды
 				for epNum, epURL := range seasonData.Episodes {
 					epNumber, _ := strconv.Atoi(epNum)
 					season.Episodes = append(season.Episodes, Episode{
@@ -159,7 +157,6 @@ func (s *Service) GetVideoByShikimoriID(
 					})
 				}
 
-				// Сортируем эпизоды по номеру
 				sort.Slice(season.Episodes, func(i, j int) bool {
 					return season.Episodes[i].Number < season.Episodes[j].Number
 				})

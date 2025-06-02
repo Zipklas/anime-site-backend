@@ -83,14 +83,13 @@ func (s *service) CreateComment(ctx context.Context, animeID, content string, us
 		return nil, errors.New("comment is too long")
 	}
 
-	// Модерация комментария
 	moderation, err := s.moderateComment(content)
 	if err != nil {
 		return nil, errors.New("moderation service error")
 	}
 
 	if !moderation.IsApproved {
-		// Формируем детальное сообщение об ошибке
+
 		var toxicLabels []string
 		for label, score := range moderation.Details {
 			if score > 0.5 && label != "non-toxic" { // Показываем только токсичные категории с высоким скором
@@ -125,7 +124,6 @@ func (s *service) CreateComment(ctx context.Context, animeID, content string, us
 	return comment, nil
 }
 
-// Добавляем новые методы
 func (s *service) VoteComment(ctx context.Context, commentID uuid.UUID, userID uuid.UUID, isUpvote bool) error {
 
 	return s.repo.AddVote(commentID, userID, isUpvote)
@@ -135,7 +133,6 @@ func (s *service) RemoveVote(ctx context.Context, commentID uuid.UUID, userID uu
 	return s.repo.RemoveVote(commentID, userID)
 }
 
-// Обновляем метод GetComments
 func (s *service) GetComments(ctx context.Context, animeID string, userID uuid.UUID) ([]CommentWithUser, error) {
 	return s.repo.GetByAnimeID(animeID, userID)
 }

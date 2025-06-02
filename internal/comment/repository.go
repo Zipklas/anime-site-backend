@@ -37,7 +37,6 @@ func (r *repository) AddVote(commentID uuid.UUID, userID uuid.UUID, isUpvote boo
 			return err
 		}
 
-		// Добавляем новый голос
 		return tx.Create(&CommentVote{
 			CommentID: commentID,
 			UserID:    userID,
@@ -77,7 +76,6 @@ func (r *repository) GetUserVote(commentID uuid.UUID, userID uuid.UUID) (*bool, 
 	return &vote.IsUpvote, nil
 }
 
-// Обновляем метод GetByAnimeID
 func (r *repository) GetByAnimeID(animeID string, userID uuid.UUID) ([]CommentWithUser, error) {
 	var comments []CommentWithUser
 
@@ -93,7 +91,6 @@ func (r *repository) GetByAnimeID(animeID string, userID uuid.UUID) ([]CommentWi
 		return nil, err
 	}
 
-	// Для каждого комментария получаем голоса
 	for i := range comments {
 		up, down, err := r.GetVotes(comments[i].ID)
 		if err != nil {

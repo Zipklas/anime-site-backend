@@ -43,7 +43,6 @@ func (h *Handler) CreateComment(c echo.Context) error {
 	return c.JSON(http.StatusCreated, comment)
 }
 
-// Добавляем новые обработчики
 func (h *Handler) VoteComment(c echo.Context) error {
 	commentID, err := uuid.Parse(c.Param("comment_id"))
 	if err != nil {
@@ -87,7 +86,6 @@ func (h *Handler) RemoveVote(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// Обновляем GetComments
 func (h *Handler) GetComments(c echo.Context) error {
 	animeID := c.Param("anime_id")
 	if animeID == "" {
