@@ -40,6 +40,12 @@ func (s *Service) SearchAnime(ctx context.Context, search string, limit int) ([]
                 originalUrl
                 mainUrl
             }
+			genres {
+                id
+                name
+                russian
+                kind
+            }
           }
         }
     `)
@@ -73,10 +79,10 @@ func (s *Service) SearchAnime(ctx context.Context, search string, limit int) ([]
 	// Возвращаем найденные аниме
 	return resp.Animes, nil
 }
-func (s *Service) GetTopAnime(ctx context.Context, limit int, page int) ([]Anime, error) {
+func (s *Service) GetTopAnime(ctx context.Context, limit int, page int, genre string) ([]Anime, error) {
 	req := graphql.NewRequest(`
-		query($limit: PositiveInt = 30, $page: PositiveInt) {
-			animes(limit: $limit, page: $page, order: ranked) {
+		query($limit: PositiveInt = 30, $page: PositiveInt, $genre: String) {
+			animes(limit: $limit, page: $page, order: ranked, genre: $genre) {
 				id
 				malId
 				name
@@ -88,13 +94,21 @@ func (s *Service) GetTopAnime(ctx context.Context, limit int, page int) ([]Anime
                 originalUrl
                 mainUrl
             }
+			genres {
+                id
+                name
+                russian
+                kind
+            }
 			}
 		}
 	`)
 
 	req.Var("limit", limit)
 	req.Var("page", page)
-
+	if genre != "" {
+		req.Var("genre", genre)
+	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Origin", "https://shikimori.one")
@@ -110,6 +124,7 @@ func (s *Service) GetTopAnime(ctx context.Context, limit int, page int) ([]Anime
 	log.Printf("→ Загружено %d топ-аниме на странице %d", len(resp.Animes), page)
 	return resp.Animes, nil
 }
+
 func (s *Service) GetAnimeByID(ctx context.Context, id string) (*Anime, error) {
 	req := graphql.NewRequest(`
         query($ids: String) {
@@ -125,7 +140,13 @@ func (s *Service) GetAnimeByID(ctx context.Context, id string) (*Anime, error) {
                 originalUrl
                 mainUrl
             }
-           }
+		genres {
+            	id
+                name
+                russian
+                kind
+        }	
+        }
        }
     `)
 
@@ -146,6 +167,7 @@ func (s *Service) GetAnimeByID(ctx context.Context, id string) (*Anime, error) {
 
 	return &resp.Animes[0], nil
 }
+
 func (s *Service) GetAnimesByIDs(ctx context.Context, ids []string) ([]Anime, error) {
 	req := graphql.NewRequest(`
         query($ids: [String!]!) {
@@ -160,6 +182,12 @@ func (s *Service) GetAnimesByIDs(ctx context.Context, ids []string) ([]Anime, er
                 id
                 originalUrl
                 mainUrl
+            }
+			genres {
+                id
+                name
+                russian
+                kind
             }
             }
         }
@@ -180,6 +208,7 @@ func (s *Service) GetAnimesByIDs(ctx context.Context, ids []string) ([]Anime, er
 
 	return resp.Animes, nil
 }
+
 func (s *Service) GetNewReleases(ctx context.Context, limit int) ([]Anime, error) {
 	req := graphql.NewRequest(`
 	query($limit: Int!, $season: SeasonString!, $status: AnimeStatusString!) {
@@ -203,6 +232,12 @@ func (s *Service) GetNewReleases(ctx context.Context, limit int) ([]Anime, error
 				day
 				date
 			}
+			genres {
+                id
+                name
+                russian
+                kind
+        }
 		}
 	}
 `)

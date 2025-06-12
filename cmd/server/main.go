@@ -7,11 +7,9 @@ import (
 
 	"github.com/Zipklas/anime-site-backend/internal/comment"
 	"github.com/Zipklas/anime-site-backend/internal/kodik"
+	"github.com/Zipklas/anime-site-backend/internal/shikimori"
 	"github.com/Zipklas/anime-site-backend/internal/user"
 	"github.com/Zipklas/anime-site-backend/pkg/database"
-
-	"github.com/Zipklas/anime-site-backend/internal/shikimori"
-
 	"github.com/joho/godotenv"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -37,7 +35,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-
+	e.Static("/uploads", "uploads")
 	e.POST("/register", userHandler.Register)
 	e.POST("/login", userHandler.Login)
 	e.POST("/api/shikimori/search", shikimoriHandler.SearchAnime)
@@ -91,6 +89,8 @@ func main() {
 	r.POST("/favorite/:anime_id", userHandler.AddFavorite)
 	r.GET("/watched", userHandler.GetWatchedAnime)
 	r.GET("/favorite", userHandler.GetFavouriteAnime)
+	r.POST("/nickname", userHandler.UpdateNickname)
+	r.POST("/avatar", userHandler.UploadAvatar)
 
 	log.Fatal(e.Start(":8080"))
 }

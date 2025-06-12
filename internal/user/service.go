@@ -15,8 +15,10 @@ import (
 )
 
 type Service interface {
-	Register(email, password string) error
+	Register(nickname, email, password string) error
 	Login(email, password string) (string, error)
+	UpdateNickname(userID string, nickname string) error
+	UpdateAvatar(userID string, avatarPath string) error
 	GetProfile(userID string) (*User, error)
 	AddWatched(userID, animeID string) error
 	AddFavorite(userID, animeID string) error
@@ -62,14 +64,20 @@ func (s *service) GetAnimeLists(userID string) ([]shikimori.Anime, []shikimori.A
 	return watched, favorites, nil
 }
 
-func (s *service) Register(email, password string) error {
+func (s *service) Register(nickname, email, password string) error {
 	// Генерация UUID для нового пользователя
 	id := uuid.New()
-
+	if len(nickname) > 32 {
+		return errors.New("nickname too long, max 32 characters")
+	}
+	if nickname == "" {
+		return errors.New("nickname cannot be empty")
+	}
 	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	user := &User{
 		ID:       id,
 		Email:    email,
+		Nickname: nickname,
 		Password: string(hash),
 	}
 	return s.repo.Create(user)
@@ -167,4 +175,18 @@ func (s *service) GetFavouriteAnimeDetails(userID string) ([]shikimori.Anime, er
 	}
 
 	return animeList, nil
+}
+func (s *service) UpdateNickname(userID string, nickname string) error {
+	// Можно добавить валидацию никнейма
+	if len(nickname) > 32 {
+		return errors.New("nickname too long, max 32 characters")
+	}
+	if nickname == "" {
+		return errors.New("nickname cannot be empty")
+	}
+	return s.repo.UpdateNickname(userID, nickname)
+}
+
+func (s *service) UpdateAvatar(userID string, avatarPath string) error {
+	return s.repo.UpdateAvatar(userID, avatarPath)
 }

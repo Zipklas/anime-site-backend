@@ -12,6 +12,9 @@ type Repository interface {
 
 	UpdateWatched(userID string, animeID string) error
 	UpdateFavorites(userID string, animeID string) error
+
+	UpdateNickname(userID string, nickname string) error
+	UpdateAvatar(userID string, avatarPath string) error
 }
 type repository struct {
 	db *gorm.DB
@@ -38,7 +41,6 @@ func (r *repository) FindByID(userID string) (*User, error) {
 		return nil, result.Error
 	}
 
-	// Инициализация массивов, если они nil
 	if user.WatchedAnimeIDs == nil {
 		user.WatchedAnimeIDs = pq.StringArray{}
 	}
@@ -58,7 +60,7 @@ func (r *repository) UpdateWatched(userID string, animeID string) error {
 		// Проверяем, есть ли уже этот animeID в массиве
 		for _, id := range user.WatchedAnimeIDs {
 			if id == animeID {
-				return nil // Уже существует, ничего не делаем
+				return nil
 			}
 		}
 
@@ -85,4 +87,11 @@ func (r *repository) UpdateFavorites(userID string, animeID string) error {
 		user.FavoriteAnimeIDs = append(user.FavoriteAnimeIDs, animeID)
 		return tx.Save(&user).Error
 	})
+}
+func (r *repository) UpdateNickname(userID string, nickname string) error {
+	return r.db.Model(&User{}).Where("id = ?", userID).Update("nickname", nickname).Error
+}
+
+func (r *repository) UpdateAvatar(userID string, avatarPath string) error {
+	return r.db.Model(&User{}).Where("id = ?", userID).Update("avatar", avatarPath).Error
 }

@@ -44,7 +44,7 @@ func (h *Handler) GetTopAnime(c echo.Context) error {
 
 	limitStr := c.QueryParam("limit")
 	pageStr := c.QueryParam("page")
-
+	genre := c.QueryParam("genre")
 	limit := 30
 	page := 1
 
@@ -62,7 +62,7 @@ func (h *Handler) GetTopAnime(c echo.Context) error {
 
 	log.Printf("Запрос топ аниме: limit=%d, page=%d", limit, page)
 
-	animes, err := h.service.GetTopAnime(c.Request().Context(), limit, page)
+	animes, err := h.service.GetTopAnime(c.Request().Context(), limit, page, genre)
 	if err != nil {
 		log.Printf("Ошибка при получении топ-аниме: %v", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Не удалось получить топ-аниме"})
